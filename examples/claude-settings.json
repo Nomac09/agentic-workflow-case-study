@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.local)",
+      "Read(./.env.*.local)",
+      "Read(./.env.development)",
+      "Read(./.env.production)",
+      "Read(./.env.test)",
+      "Edit(./.env)",
+      "Edit(./.env.local)",
+      "Edit(./.env.*.local)",
+      "Edit(./.env.development)",
+      "Edit(./.env.production)",
+      "Edit(./.env.test)",
+      "Bash(npm run seed:*)",
+      "Bash(node scripts/seed-supabase.mjs:*)",
+      "Bash(vercel env:*)",
+      "Bash(vercel promote:*)",
+      "Bash(vercel --prod:*)",
+      "Bash(vercel deploy --prod:*)",
+      "Bash(supabase db push:*)",
+      "Bash(git push origin main:*)",
+      "Edit(./.claude/**)",
+      "Write(./.claude/**)",
+      "Edit(./.mcp.json)",
+      "Write(./.mcp.json)",
+      "Edit(./.git/config)",
+      "Write(./.git/config)",
+      "Edit(./.git/hooks/**)",
+      "Write(./.git/hooks/**)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Read|Edit|Write|MultiEdit|NotebookEdit|Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/guard.ts || exit 2",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pre-commit-tests.ts || exit 2",
+            "timeout": 300
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/post-edit-check.ts || exit 2",
+            "timeout": 180
+          }
+        ]
+      }
+    ]
+  }
+}
